@@ -131,7 +131,7 @@ public class UserProgram {
           <div className="ide-brand">
             <div className="brand-bubble">SS</div>
             <div>
-              <div style={{ fontWeight: 700, color: "#e6f7ff" }}>Sulabh's Javasjkjfklwjewe</div>
+              <div style={{ fontWeight: 700, color: "#e6f7ff" }}>Sulabh's Javas compiler</div>
               <div className="muted" style={{ fontSize: 13 }}>Online compiler — custom look</div>
             </div>
           </div>
