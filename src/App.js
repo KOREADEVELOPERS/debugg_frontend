@@ -2,7 +2,7 @@ import React, { useState } from "react";
 
 /*
   CodeIDE.jsx
-  - Programiz-like dark IDE layout (custom branding)
+  - Programiz-like dark IDE layout (custom  branding)
   - Works with backend expecting `text/plain`
 */
 
