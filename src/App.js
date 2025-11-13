@@ -71,7 +71,7 @@ public class UserProgram {
     setOutput("");
     try {
       // Send pure Java code as text/plain (backend expects this)
-      const response = await fetch("http://localhost:8080/api/code/run", {
+      const response = await fetch("https://compilerdebug.onrender.com/api/code/run", {
         method: "POST",
         headers: { "Content-Type": "text/plain" },
         body: activeFile.content,
