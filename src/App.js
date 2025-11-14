@@ -2,8 +2,8 @@ import React, { useState } from "react";
 
 /*
   CodeIDE.jsx
-  - Programiz-like dark IDE layout (custom  branding)
-  - Works with backend expecting `text/plain`
+  - Updated: Scanner input support
+  - Backend expects JSON { code: "...", input: "..." }
 */
 
 const CodeIDE = () => {
@@ -11,29 +11,22 @@ const CodeIDE = () => {
     {
       id: 1,
       name: "UserProgram.java",
-      content: `import javax.swing.*;
-import java.awt.Color;
+      content: `import java.util.Scanner;
 public class UserProgram {
-  JFrame frame;
-  JPanel panel;
-  UserProgram(){
-    frame=new JFrame("Frame");
-    frame.setSize(600,600);
-    frame.setDefaultCloseOperation(frame.EXIT_ON_CLOSE);
-
-    panel=new JPanel();
-    panel.setBackground(Color.BLACK);
-    frame.add(panel);
-    frame.setVisible(true);
-  }
-  public static void main(String[] args) {
-    new UserProgram();
-  }
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        System.out.print("Enter your age: ");
+        int age = sc.nextInt();
+        System.out.print("Enter your name: ");
+        String name = sc.next();
+        System.out.println("Age: " + age + ", Name: " + name);
+    }
 }`,
     },
   ]);
 
   const [activeFileId, setActiveFileId] = useState(1);
+  const [scannerInput, setScannerInput] = useState("");
   const [output, setOutput] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -65,16 +58,18 @@ public class UserProgram {
     }
   };
 
-  // ---- FIXED RUN CODE ----
+  // ---- RUN CODE WITH SCANNER INPUT ----
   const runCode = async () => {
     setLoading(true);
     setOutput("");
     try {
-      // Send pure Java code as text/plain (backend expects this)
-      const response = await fetch("https://compilerdebug.onrender.com/api/code/run", {
+      const response = await fetch("http://localhost:8080/api/code/run", {
         method: "POST",
-        headers: { "Content-Type": "text/plain" },
-        body: activeFile.content,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          code: activeFile.content,
+          input: scannerInput,
+        }),
       });
 
       if (!response.ok) {
@@ -90,7 +85,7 @@ public class UserProgram {
       setLoading(false);
     }
   };
-  // -----------------------
+  // --------------------------------------
 
   const clearOutput = () => setOutput("");
 
@@ -110,8 +105,8 @@ public class UserProgram {
         .tabs { display:flex; gap:8px; align-items:center; padding-bottom:8px; border-bottom:1px solid rgba(255,255,255,0.03); }
         .tab { padding:8px 12px; background: rgba(0,0,0,0.25); border-radius:8px; color:#dbeafe; cursor:pointer; display:flex; gap:8px; align-items:center; }
         .tab.active { background: linear-gradient(90deg,#0ea5e9, #3b82f6); color:#001; font-weight:600; box-shadow:0 8px 20px rgba(59,130,246,0.12); }
-        .editor { flex:1; margin-top:8px; }
-        textarea.code-area { width:100%; height:100%; min-height:300px; resize:vertical; padding:16px; background:#0b1220; color:#cfeee8; border:1px solid rgba(255,255,255,0.02); border-radius:10px; font-family: 'Consolas', monospace; font-size:14px; line-height:1.5; }
+        .editor { flex:1; margin-top:8px; display:flex; flex-direction:column; gap:8px; }
+        textarea.code-area { width:100%; height:100%; min-height:120px; resize:vertical; padding:16px; background:#0b1220; color:#cfeee8; border:1px solid rgba(255,255,255,0.02); border-radius:10px; font-family: 'Consolas', monospace; font-size:14px; line-height:1.5; }
         .runner-bar { display:flex; gap:12px; align-items:center; padding:12px 16px; border-top:1px solid rgba(255,255,255,0.02); }
         .run-btn { padding:10px 18px; border-radius:999px; font-weight:700; color:#052; background:linear-gradient(90deg,#00f0ff,#0072ff); box-shadow:0 10px 30px rgba(0,114,255,0.12); border:none; }
         .ghost-btn { padding:8px 12px; border-radius:8px; background:transparent; border:1px solid rgba(255,255,255,0.04); color:#cfeee8; }
@@ -131,7 +126,7 @@ public class UserProgram {
           <div className="ide-brand">
             <div className="brand-bubble">SS</div>
             <div>
-              <div style={{ fontWeight: 700, color: "#e6f7ff" }}>Sulabh's Javas compiler</div>
+              <div style={{ fontWeight: 700, color: "#e6f7ff" }}>Sulabh's Java Debugger</div>
               <div className="muted" style={{ fontSize: 13 }}>Online compiler — custom look</div>
             </div>
           </div>
@@ -184,6 +179,16 @@ public class UserProgram {
                 value={activeFile?.content || ""}
                 onChange={(e) => updateContent(e.target.value)}
                 spellCheck="false"
+                placeholder="Enter your Java code here"
+              />
+
+              {/* Scanner input */}
+              <textarea
+                className="code-area"
+                style={{ minHeight: 80 }}
+                value={scannerInput}
+                onChange={(e) => setScannerInput(e.target.value)}
+                placeholder="Enter input for Scanner (each input separated by newline)"
               />
             </div>
 
@@ -195,7 +200,7 @@ public class UserProgram {
 
               <div style={{ display: "flex", gap: 10 }}>
                 <div className="muted">Last run: <strong style={{ color: "#a9f4ff" }}>—</strong></div>
-                <button className="ghost-btn" onClick={clearOutput}>Clear Output</button>
+                <button className="ghost-btn" onClick={() => setOutput("")}>Clear Output</button>
               </div>
             </div>
           </div>
